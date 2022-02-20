@@ -1,21 +1,26 @@
 # This is a clone of the classic Space Invader game codded in Python 3.9 using the pygame module
 
 import pygame, sys
+from player import Player
+
 
 class Game:
     def __init__(self):
-        pass
+        player_sprite = Player((screen_width / 2,screen_height))
+        self.player = pygame.sprite.GroupSingle(player_sprite)
 
     def run(self):
-        pass
+        self.player.update()
+        self.player.draw(screen)
         # update all sprite groups
         # draw all sprite groups
+
 
 if __name__ == '__main__':
     pygame.init()
     screen_width = 600
     screen_height = 600
-    screen = pygame.display.set_mode((screen_width,screen_height))
+    screen = pygame.display.set_mode((screen_width, screen_height))
     clock = pygame.time.Clock()
     game = Game()
 
@@ -25,11 +30,8 @@ if __name__ == '__main__':
                 pygame.quit()
                 sys.exit()
 
-        screen.fill((30.30.30))
+        screen.fill((30,30,30))
         game.run()
 
         pygame.display.flip()
         clock.tick(60)
-
-
-
