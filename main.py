@@ -9,6 +9,7 @@ class Game:
         self.player = pygame.sprite.GroupSingle(player_sprite)
 
     def run(self):
+        self.player.sprite.lasers.draw(screen)
         self.player.update()
         self.player.draw(screen)
         # update all sprite groups
