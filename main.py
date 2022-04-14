@@ -116,6 +116,9 @@ class Game:
 
                 if pygame.sprite.spritecollide(laser,self.player,False):
                     laser.kill()
+                    self.lives -= 1
+                    if self.lives <= 0:
+                        pygame.quit()
 
       # Aliens
        if self.aliens:
