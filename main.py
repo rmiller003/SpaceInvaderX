@@ -3,7 +3,7 @@
 import pygame, sys
 from player import Player
 import obstacle
-from alien import Alien, Extra
+from alien import Alien, Extra, Extra2
 from random import choice, randint
 from laser import Laser
 
@@ -17,7 +17,8 @@ class Game:
         self.lives = 3
         self.live_surf = pygame.image.load('player.png').convert_alpha()
         self.live_x_start_pos = screen_width - (self.live_surf.get_size()[0] * 2 +20)
-
+        self.score = 0
+        self.font = pygame.font.Font('Pixeled.ttf', 20)
 
         # Obstacle setup
         self.shape = obstacle.shape
@@ -36,6 +37,14 @@ class Game:
         # Extra setup
         self.extra = pygame.sprite.GroupSingle()
         self.extra_spawn_time = randint(40,80)
+
+        self.extra2 = pygame.sprite.GroupSingle()
+        self.extra2_spawn_time = randint(40,80)
+
+        # Audio Setup
+        music = pygame.mixer.Sound('music.wav')
+        music.set_volume(0.2)
+        music.play(loops = -1)
 
 
     def create_obstacles(self, x_start, y_start,offset_x):
@@ -90,24 +99,38 @@ class Game:
             self.extra.add(Extra(choice(['right', 'left']),screen_width))
             self.extra_spawn_time = randint(400,800)
 
+    def extra2_alien_timer(self):
+        self.extra2_spawn_time -= 1
+        if self.extra2_spawn_time <= 0:
+            self.extra2.add(Extra2(choice(['left', 'right']),screen_width))
+            self.extra2_spawn_time = randint(400,800)
+
     def collision_checks(self):
 
        #player lasers
        if self.player.sprite.lasers:
            for laser in self.player.sprite.lasers:
+
                # obstacle collisions
                 if pygame.sprite.spritecollide(laser,self.blocks,True):
                     laser.kill()
 
                 # Alien collisions
                 if pygame.sprite.spritecollide(laser,self.aliens,True):
-                   laser.kill()
+                    self.score += 100
+                    laser.kill()
+
 
                 # Extra ship collision
                 if pygame.sprite.spritecollide(laser,self.extra,True):
-                   laser.kill()
+                    self.score += 500
+                    laser.kill()
 
-            # Alien laser
+                if pygame.sprite.spritecollide(laser,self.extra2,True):
+                    self.score += 300
+                    laser.kill()
+
+        # Alien laser
        if self.alien_lasers:
             for laser in self.alien_lasers:
                 # obstacle collisions
@@ -134,27 +157,32 @@ class Game:
             x = self.live_x_start_pos + (live * (self.live_surf.get_size()[0] + 10))
             screen.blit(self.live_surf,(x,8))
 
-
+    def display_score(self):
+        score_surf = self.font.render(f'score: {self.score}',False, 'white')
+        score_rect = score_surf.get_rect(topleft = (10,-10))
+        screen.blit(score_surf, score_rect)
 
     def run(self):
+        self.player.update()
+        self.alien_lasers.update()
+        self.extra.update()
+        self.extra2.update()
+
         self.aliens.update(self.alien_direction)
         self.alien_position_checker()
-        self.player.sprite.lasers.draw(screen)
-        self.player.update()
-        self.player.draw(screen)
-        self.alien_lasers.update()
         self.extra_alien_timer()
+        self.extra2_alien_timer()
         self.collision_checks()
-        self.display_lives()
-        self.extra.update()
 
+        self.player.sprite.lasers.draw(screen)
+        self.player.draw(screen)
         self.blocks.draw(screen)
         self.aliens.draw(screen)
         self.alien_lasers.draw(screen)
         self.extra.draw(screen)
-        # update all sprite groups
-        # draw all sprite groups
-
+        self.extra2.draw(screen)
+        self.display_lives()
+        self.display_score()
 
 if __name__ == '__main__':
     pygame.init()
