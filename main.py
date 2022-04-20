@@ -45,7 +45,12 @@ class Game:
         music = pygame.mixer.Sound('music.wav')
         music.set_volume(0.2)
         music.play(loops = -1)
-
+        self.laser_sound = pygame.mixer.Sound('laser2.wav')
+        self.laser_sound.set_volume(0.5)
+        self.explosion_sound = pygame.mixer.Sound('explosion.wav')
+        self.explosion_sound.set_volume(0.5)
+        self.explosion2_sound = pygame.mixer.Sound('explosion2.wav')
+        self.explosion2_sound.set_volume(0.9)
 
     def create_obstacles(self, x_start, y_start,offset_x):
         for row_index, row in enumerate(self.shape):
@@ -92,6 +97,7 @@ class Game:
             random_alien = choice(self.aliens.sprites())
             laser_sprite = Laser(random_alien.rect.center,6,screen_height)
             self.alien_lasers.add(laser_sprite)
+            self.laser_sound.play()
 
     def extra_alien_timer(self):
         self.extra_spawn_time -= 1
@@ -119,17 +125,19 @@ class Game:
                 if pygame.sprite.spritecollide(laser,self.aliens,True):
                     self.score += 100
                     laser.kill()
+                    self.explosion_sound.play()
 
 
                 # Extra ship collision
                 if pygame.sprite.spritecollide(laser,self.extra,True):
                     self.score += 500
                     laser.kill()
+                    self.explosion2_sound.play()
 
                 if pygame.sprite.spritecollide(laser,self.extra2,True):
-                    self.score += 300
+                    self.score += 1000
                     laser.kill()
-
+                    self.explosion2_sound.play()
         # Alien laser
        if self.alien_lasers:
             for laser in self.alien_lasers:
@@ -162,6 +170,12 @@ class Game:
         score_rect = score_surf.get_rect(topleft = (10,-10))
         screen.blit(score_surf, score_rect)
 
+    def victory_message(self):
+        if not self.aliens.sprites():
+            victory_surf = self.font.render('You won!!', False, 'white')
+            victory_rect = victory_surf.get_rect(center = (screen_width / 2, screen_height /2 ))
+            screen.blit(victory_surf,victory_rect)
+
     def run(self):
         self.player.update()
         self.alien_lasers.update()
@@ -183,6 +197,7 @@ class Game:
         self.extra2.draw(screen)
         self.display_lives()
         self.display_score()
+        self.victory_message()
 
 if __name__ == '__main__':
     pygame.init()
